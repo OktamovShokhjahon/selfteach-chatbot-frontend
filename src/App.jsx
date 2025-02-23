@@ -5,6 +5,10 @@ import { Sidebar } from "./components/Sidebar/Sidebar";
 import { QuestionForm } from "./components/MainContent/QuestionForm";
 import { ResponseDisplay } from "./components/MainContent/ResponseDisplay";
 import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./components/Login/Login";
+import Register from "./components/Register/Register";
+import Layout from "./components/Layout/Layout";
 
 function App() {
   const [formData, setFormData] = useState({
@@ -86,45 +90,35 @@ function App() {
   };
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
-        <div className="flex flex-col md:flex-row">
-          <ThemeToggle />
-
-          {/* Mobile Sidebar Toggle */}
-          <button
-            className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-indigo-500 text-white"
-            onClick={toggleSidebar}
-          >
-            {sidebarOpen ? "✕" : "☰"}
-          </button>
-
-          <Sidebar
-            history={history}
-            onHistoryClick={handleHistoryClick}
-            sidebarOpen={sidebarOpen}
-            onCloseSidebar={closeSidebar}
+    <Router>
+      <ThemeProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/"
+            element={
+              <Layout
+                history={history}
+                onHistoryClick={handleHistoryClick}
+                sidebarOpen={sidebarOpen}
+                onCloseSidebar={closeSidebar}
+              >
+                <div className="max-w-[1300px] mx-auto rounded-xl shadow-md p-4 md:p-8 bg-white dark:bg-gray-800">
+                  <QuestionForm
+                    formData={formData}
+                    loading={loading}
+                    onSubmit={handleSubmit}
+                    onChange={handleChange}
+                  />
+                  <ResponseDisplay response={response} />
+                </div>
+              </Layout>
+            }
           />
-
-          <div className="flex-1 p-4 md:p-8 md:ml-0">
-            <div className="max-w-[1300px] mx-auto rounded-xl shadow-md p-4 md:p-8 bg-white dark:bg-gray-800">
-              <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 text-gray-800 dark:text-white">
-                SelfTeach
-              </h1>
-
-              <QuestionForm
-                formData={formData}
-                loading={loading}
-                onSubmit={handleSubmit}
-                onChange={handleChange}
-              />
-
-              <ResponseDisplay response={response} />
-            </div>
-          </div>
-        </div>
-      </div>
-    </ThemeProvider>
+        </Routes>
+      </ThemeProvider>
+    </Router>
   );
 }
 
