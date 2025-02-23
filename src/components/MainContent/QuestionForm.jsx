@@ -1,10 +1,38 @@
 import { useTheme } from "../../context/ThemeContext";
+import { useChatHistory } from "../../hooks/useChatHistory";
 
 export function QuestionForm({ formData, loading, onSubmit, onChange }) {
   const { darkMode } = useTheme();
+  const { createHistory } = useChatHistory();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Create chat history entry
+    const historyEntry = {
+      title: formData.question.slice(0, 50) + "...", // Create a title from the question
+      subject: formData.subject,
+      mainCommand: formData.mainCommand,
+      messages: [
+        {
+          type: "question",
+          content: formData.question,
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+
+    try {
+      await createHistory(historyEntry);
+      // Call the original onSubmit handler
+      onSubmit(e);
+    } catch (error) {
+      console.error("Failed to save chat history:", error);
+    }
+  };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 md:space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
       <div>
         <textarea
           name="question"

@@ -1,4 +1,5 @@
 import { useTheme } from "../../context/ThemeContext";
+import ChatHistoryList from "../ChatHistory/ChatHistoryList";
 import { HistoryItem } from "./HistoryItem";
 
 export function Sidebar({
@@ -26,13 +27,14 @@ export function Sidebar({
           Tarix
         </h2>
         <div className="space-y-4">
-          {history.map((item, index) => (
+          <ChatHistoryList />
+          {/* {history.map((item, index) => (
             <HistoryItem
               key={index}
               item={item}
               onClick={() => onHistoryClick(item)}
             />
-          ))}
+          ))} */}
         </div>
       </div>
     </>
