@@ -8,6 +8,7 @@ const Layout = ({
   onHistoryClick,
   sidebarOpen,
   onCloseSidebar,
+  setSidebarOpen,
 }) => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
@@ -17,17 +18,19 @@ const Layout = ({
         {/* Mobile Sidebar Toggle */}
         <button
           className="md:hidden fixed top-20 left-4 z-50 p-2 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-indigo-500 text-white"
-          onClick={() => onCloseSidebar()}
+          onClick={() => setSidebarOpen(!sidebarOpen)}
         >
           {sidebarOpen ? "✕" : "☰"}
         </button>
 
-        <Sidebar
-          history={history}
-          onHistoryClick={onHistoryClick}
-          sidebarOpen={sidebarOpen}
-          onCloseSidebar={onCloseSidebar}
-        />
+        {sidebarOpen && (
+          <Sidebar
+            history={history}
+            onHistoryClick={onHistoryClick}
+            sidebarOpen={sidebarOpen}
+            onCloseSidebar={onCloseSidebar}
+          />
+        )}
 
         <main className="flex-1 p-4 md:p-8 md:ml-0">{children}</main>
       </div>

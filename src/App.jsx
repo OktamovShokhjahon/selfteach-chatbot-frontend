@@ -118,6 +118,7 @@ function App() {
                 onHistoryClick={handleHistoryClick}
                 sidebarOpen={sidebarOpen}
                 onCloseSidebar={closeSidebar}
+                setSidebarOpen={setSidebarOpen}
               >
                 <div className="max-w-[1300px] mx-auto rounded-xl shadow-md p-4 md:p-8 bg-white dark:bg-gray-800">
                   <QuestionForm

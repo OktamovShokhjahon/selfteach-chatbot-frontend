@@ -5,6 +5,7 @@ import { HistoryItem } from "./HistoryItem";
 export function Sidebar({
   history,
   onHistoryClick,
+
   sidebarOpen,
   onCloseSidebar,
 }) {
