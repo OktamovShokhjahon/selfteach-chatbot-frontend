@@ -8,9 +8,9 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4">
-            {/* Toggle/Close Button */}
+            {/* Toggle/Close Button - only visible on mobile */}
             <button
-              className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-indigo-500 text-white cursor-pointer"
+              className="md:hidden p-2 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-indigo-500 text-white"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               {sidebarOpen ? "✕" : "☰"}
