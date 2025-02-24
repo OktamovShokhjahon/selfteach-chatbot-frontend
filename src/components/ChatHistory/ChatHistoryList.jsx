@@ -1,12 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const ChatHistoryList = () => {
   const [histories, setHistories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "chat_histories") {
+        const updatedHistories = e.newValue ? JSON.parse(e.newValue) : [];
+        setHistories(updatedHistories);
+      }
+    };
+
+    const handleHistoryUpdate = () => {
+      loadHistories();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("chatHistoryUpdated", handleHistoryUpdate);
+    loadHistories();
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("chatHistoryUpdated", handleHistoryUpdate);
+    };
+  }, []);
+
+  const loadHistories = () => {
     try {
       const stored = localStorage.getItem("chat_histories");
       const histories = stored ? JSON.parse(stored) : [];
@@ -16,7 +40,7 @@ const ChatHistoryList = () => {
       setError("Chat tarixini yuklashda xatolik");
       setLoading(false);
     }
-  }, []);
+  };
 
   const deleteHistory = (id) => {
     try {
@@ -26,6 +50,32 @@ const ChatHistoryList = () => {
     } catch (err) {
       setError("Tarixni o'chirishda xatolik");
     }
+  };
+
+  const handleHistorySelect = (history) => {
+    // Create a properly formatted history object
+    const formattedHistory = {
+      messages: [
+        {
+          content: history.messages[0]?.content || "",
+          type: "question",
+        },
+        {
+          content: history.messages[1]?.content || "",
+          type: "answer",
+        },
+      ],
+      subject: history.subject,
+      mainCommand: history.mainCommand,
+    };
+
+    localStorage.setItem("selected_history", JSON.stringify(formattedHistory));
+
+    window.dispatchEvent(
+      new CustomEvent("historySelected", {
+        detail: formattedHistory,
+      })
+    );
   };
 
   if (loading) {
@@ -61,7 +111,8 @@ const ChatHistoryList = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-100 dark:border-gray-700"
+            className="cursor-pointer p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-100 dark:border-gray-700"
+            onClick={() => handleHistorySelect(history)}
           >
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
               {history.title}
@@ -85,7 +136,10 @@ const ChatHistoryList = () => {
               </div>
             </div>
             <button
-              onClick={() => deleteHistory(history.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteHistory(history.id);
+              }}
               className="mt-4 px-4 py-2 w-full text-sm text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
             >
               <svg

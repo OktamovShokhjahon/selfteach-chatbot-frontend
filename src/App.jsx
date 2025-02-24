@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 import Layout from "./components/Layout/Layout";
+import { useChatHistory } from "./hooks/useChatHistory";
 
 function App() {
   const [formData, setFormData] = useState({
@@ -20,6 +21,7 @@ function App() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { createHistory } = useChatHistory();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,15 +36,28 @@ function App() {
       });
       const data = await res.json();
       setResponse(data);
-      setHistory((prev) => [
-        ...prev,
-        {
-          question: formData.question,
-          answer: data.answer,
-          subject: formData.subject,
-          mainCommand: formData.mainCommand,
-        },
-      ]);
+
+      // Create history entry
+      const historyEntry = {
+        title: formData.question.slice(0, 50) + "...",
+        messages: [
+          {
+            type: "question",
+            content: formData.question,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            type: "answer",
+            content: data.answer,
+            timestamp: new Date().toISOString(),
+          },
+        ],
+        subject: formData.subject,
+        mainCommand: formData.mainCommand,
+      };
+
+      // Use createHistory from useChatHistory hook
+      await createHistory(historyEntry);
     } catch (error) {
       console.error("Xato:", error);
     } finally {
@@ -110,6 +125,7 @@ function App() {
                     loading={loading}
                     onSubmit={handleSubmit}
                     onChange={handleChange}
+                    setResponse={setResponse}
                   />
                   <ResponseDisplay response={response} />
                 </div>

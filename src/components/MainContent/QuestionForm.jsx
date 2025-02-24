@@ -1,34 +1,61 @@
 import { useTheme } from "../../context/ThemeContext";
-import { useChatHistory } from "../../hooks/useChatHistory";
+import { useEffect } from "react";
 
-export function QuestionForm({ formData, loading, onSubmit, onChange }) {
+export function QuestionForm({
+  formData,
+  loading,
+  onSubmit,
+  onChange,
+  setResponse,
+}) {
   const { darkMode } = useTheme();
-  const { createHistory } = useChatHistory();
+
+  useEffect(() => {
+    const handleHistorySelected = (event) => {
+      const history = event.detail;
+      // Update form data
+      onChange({
+        target: { name: "question", value: history.messages[0]?.content || "" },
+      });
+      onChange({ target: { name: "subject", value: history.subject } });
+      onChange({ target: { name: "mainCommand", value: history.mainCommand } });
+
+      // Update response
+      if (history.messages && history.messages.length > 1) {
+        setResponse({
+          answer: history.messages[1]?.content || "",
+        });
+      }
+    };
+
+    // Check for selected history in localStorage when component mounts
+    const selectedHistory = localStorage.getItem("selected_history");
+    if (selectedHistory) {
+      const history = JSON.parse(selectedHistory);
+      onChange({
+        target: { name: "question", value: history.messages[0]?.content || "" },
+      });
+      onChange({ target: { name: "subject", value: history.subject } });
+      onChange({ target: { name: "mainCommand", value: history.mainCommand } });
+
+      // Update response if it exists in history
+      if (history.messages && history.messages.length > 1) {
+        setResponse({
+          answer: history.messages[1]?.content || "",
+        });
+      }
+      localStorage.removeItem("selected_history"); // Clean up
+    }
+
+    window.addEventListener("historySelected", handleHistorySelected);
+    return () => {
+      window.removeEventListener("historySelected", handleHistorySelected);
+    };
+  }, [onChange, setResponse]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Create chat history entry
-    const historyEntry = {
-      title: formData.question.slice(0, 50) + "...", // Create a title from the question
-      subject: formData.subject,
-      mainCommand: formData.mainCommand,
-      messages: [
-        {
-          type: "question",
-          content: formData.question,
-          timestamp: new Date().toISOString(),
-        },
-      ],
-    };
-
-    try {
-      await createHistory(historyEntry);
-      // Call the original onSubmit handler
-      onSubmit(e);
-    } catch (error) {
-      console.error("Failed to save chat history:", error);
-    }
+    onSubmit(e);
   };
 
   return (

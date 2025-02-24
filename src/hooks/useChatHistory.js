@@ -26,6 +26,8 @@ export const useChatHistory = () => {
     try {
       const newHistory = await chatHistoryAPI.create(historyData);
       setHistories((prev) => [...prev, newHistory]);
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event("chatHistoryUpdated"));
       setError(null);
       return newHistory;
     } catch (err) {
