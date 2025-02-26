@@ -56,7 +56,12 @@ export function QuestionForm({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(e);
+    await onSubmit(e);
+
+    // Clear the form after submission
+    onChange({ target: { name: "question", value: "" } });
+    onChange({ target: { name: "subject", value: "" } });
+    onChange({ target: { name: "mainCommand", value: "" } });
   };
 
   const formVariants = {

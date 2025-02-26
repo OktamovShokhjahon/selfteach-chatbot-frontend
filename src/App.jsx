@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle/ThemeToggle";
 import { Sidebar } from "./components/Sidebar/Sidebar";
@@ -22,6 +22,50 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { createHistory } = useChatHistory();
+
+  useEffect(() => {
+    const handleHistorySelected = (event) => {
+      const history = event.detail;
+      // Update form data
+      setFormData({
+        question: history.messages[0]?.content || "",
+        subject: history.subject,
+        mainCommand: history.mainCommand,
+      });
+
+      // Update response if it exists in history
+      if (history.messages && history.messages.length > 1) {
+        setResponse({
+          answer: history.messages[1]?.content || "",
+        });
+      }
+    };
+
+    const handleClearResponse = () => {
+      setResponse(null);
+      setFormData({
+        subject: "",
+        question: "",
+        mainCommand: "",
+      });
+    };
+
+    window.addEventListener("historySelected", handleHistorySelected);
+    window.addEventListener("clearResponse", handleClearResponse);
+
+    // Check for selected history in localStorage when component mounts
+    const selectedHistory = localStorage.getItem("selected_history");
+    if (selectedHistory) {
+      const history = JSON.parse(selectedHistory);
+      handleHistorySelected({ detail: history });
+      localStorage.removeItem("selected_history"); // Clean up
+    }
+
+    return () => {
+      window.removeEventListener("historySelected", handleHistorySelected);
+      window.removeEventListener("clearResponse", handleClearResponse);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,6 +102,13 @@ function App() {
 
       // Use createHistory from useChatHistory hook
       await createHistory(historyEntry);
+
+      // Clear form data after successful submission
+      setFormData({
+        subject: "",
+        question: "",
+        mainCommand: "",
+      });
     } catch (error) {
       console.error("Xato:", error);
     } finally {
