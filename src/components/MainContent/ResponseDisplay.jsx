@@ -1,14 +1,29 @@
 import { useTheme } from "../../context/ThemeContext";
+import { motion } from "framer-motion";
 
 export function ResponseDisplay({ response }) {
   const { darkMode } = useTheme();
+
+  const responseVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
 
   if (!response) return null;
 
   console.log(response);
 
   return (
-    <div
+    <motion.div
+      variants={responseVariants}
+      initial="hidden"
+      animate="visible"
       className={`mt-6 md:mt-8 p-4 md:p-6 rounded-lg border ${
         darkMode
           ? "bg-gray-700 border-gray-600 text-white"
@@ -33,6 +48,6 @@ export function ResponseDisplay({ response }) {
           )
         )}
       </p>
-    </div>
+    </motion.div>
   );
 }

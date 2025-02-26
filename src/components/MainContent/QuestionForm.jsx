@@ -1,5 +1,6 @@
 import { useTheme } from "../../context/ThemeContext";
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 export function QuestionForm({
   formData,
@@ -58,9 +59,26 @@ export function QuestionForm({
     onSubmit(e);
   };
 
+  const formVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
-      <div>
+    <motion.form
+      variants={formVariants}
+      initial="hidden"
+      animate="visible"
+      onSubmit={handleSubmit}
+      className="space-y-4 md:space-y-6"
+    >
+      <motion.div whileHover={{ scale: 1.01 }} className="relative">
         <textarea
           name="question"
           value={formData.question}
@@ -70,10 +88,11 @@ export function QuestionForm({
           rows="4"
           required
         />
-      </div>
+      </motion.div>
 
       <div className="flex flex-col md:flex-row gap-4">
-        <select
+        <motion.select
+          whileHover={{ scale: 1.01 }}
           name="subject"
           value={formData.subject}
           onChange={onChange}
@@ -157,9 +176,10 @@ export function QuestionForm({
           >
             Astronomiya
           </option>
-        </select>
+        </motion.select>
 
-        <select
+        <motion.select
+          whileHover={{ scale: 1.01 }}
           name="mainCommand"
           value={formData.mainCommand}
           onChange={onChange}
@@ -207,10 +227,12 @@ export function QuestionForm({
           >
             Boshqa
           </option>
-        </select>
+        </motion.select>
       </div>
 
-      <button
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         type="submit"
         disabled={loading}
         className={`w-full p-3 rounded-lg transition-colors duration-200 ${
@@ -220,7 +242,7 @@ export function QuestionForm({
         } text-white font-medium`}
       >
         {loading ? "Yuklanmoqda..." : "Yuborish"}
-      </button>
-    </form>
+      </motion.button>
+    </motion.form>
   );
 }
