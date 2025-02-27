@@ -1,75 +1,86 @@
-// Local Storage Keys
-const CHAT_HISTORY_KEY = "chat_histories";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
-// Helper functions for localStorage
-const getStoredHistories = () => {
-  const stored = localStorage.getItem(CHAT_HISTORY_KEY);
-  return stored ? JSON.parse(stored) : [];
-};
-
-const setStoredHistories = (histories) => {
-  localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(histories));
-};
+const BASE_URL = "http://localhost:3000/api";
 
 export const chatHistoryAPI = {
-  // Create new chat history
-  create: async (data) => {
-    const histories = getStoredHistories();
-    const newHistory = {
-      id: Date.now().toString(), // Simple ID generation
-      ...data,
-      createdAt: new Date().toISOString(),
-    };
-    histories.push(newHistory);
-    setStoredHistories(histories);
-    return newHistory;
-  },
+  async getAll() {
+    const token = localStorage.getItem("token");
+    // const user = await axios.post(
+    //   `${BASE_URL}/token/decode`,
+    //   {
+    //     token,
+    //   },
+    //   {
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   }
+    // );
+    // console.log("user", user);
+    const response = await fetch(`${BASE_URL}/chat-history`, {
+      // method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      // body: JSON.stringify({ token }),
+    });
 
-  // Get all chat histories
-  getAll: async () => {
-    return getStoredHistories();
-  },
-
-  // Get specific chat history
-  getById: async (id) => {
-    const histories = getStoredHistories();
-    const history = histories.find((h) => h.id === id);
-    if (!history) {
-      throw new Error("Chat history not found");
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error response:", errorData); // Debug log
+      throw new Error(errorData.message || "Failed to fetch history");
     }
-    return history;
+    return response.json();
   },
 
-  // Update chat history
-  update: async (id, data) => {
-    const histories = getStoredHistories();
-    const index = histories.findIndex((h) => h.id === id);
-    if (index === -1) {
-      throw new Error("Chat history not found");
+  async create(historyData) {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${BASE_URL}/study`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-auth-token": token,
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(historyData),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create history");
     }
-    const updatedHistory = {
-      ...histories[index],
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
-    histories[index] = updatedHistory;
-    setStoredHistories(histories);
-    return updatedHistory;
+    return response.json();
   },
 
-  // Delete chat history
-  delete: async (id) => {
-    const histories = getStoredHistories();
-    const filteredHistories = histories.filter((h) => h.id !== id);
-    setStoredHistories(filteredHistories);
-    return { success: true, message: "Chat history deleted" };
+  async delete(id) {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${BASE_URL}/chat-history/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to delete history");
+    }
+    return response.json();
   },
-};
 
-// Error handler helper
-const handleApiError = (error) => {
-  if (error.message) {
-    return new Error(error.message);
-  }
-  return new Error("An error occurred");
+  async deleteAll() {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${BASE_URL}/chat-history/clear-all`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to delete all histories");
+    }
+    return response.json();
+  },
 };

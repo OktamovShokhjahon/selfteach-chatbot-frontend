@@ -2,13 +2,16 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "../Navbar/Navbar";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -19,39 +22,36 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your login logic here
     try {
-      // Make API call to your backend
-      console.log("Login data:", formData);
-      // On successful login, redirect to dashboard
-      navigate("/dashboard");
+      await login(formData.email, formData.password);
+      navigate("/");
     } catch (error) {
-      console.error("Login error:", error);
+      setError(error.message);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Navbar />
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md m-4"
+          className="w-full max-w-md space-y-8 p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg"
         >
-          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white">
-            Sign in to your account
-          </h2>
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-white">
+              Sign in to your account
+            </h2>
+          </div>
+
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm space-y-4">
-              <motion.div
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-              >
+            <div className="space-y-4">
+              <motion.div whileHover={{ scale: 1.01 }}>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   Email address
                 </label>
@@ -60,19 +60,20 @@ const Login = () => {
                   name="email"
                   type="email"
                   required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                           focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400
-                           transition-colors duration-200"
-                  placeholder="Email address"
+                           focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent
+                           transition-all duration-200"
+                  placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleChange}
                 />
               </motion.div>
-              <div>
+
+              <motion.div whileHover={{ scale: 1.01 }}>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   Password
                 </label>
@@ -81,34 +82,38 @@ const Login = () => {
                   name="password"
                   type="password"
                   required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="Password"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                           focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent
+                           transition-all duration-200"
+                  placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
                 />
-              </div>
+              </motion.div>
             </div>
 
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white 
-                       bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600
-                       transition-colors duration-200"
+              className="w-full py-3 px-4 rounded-lg text-white text-lg font-medium
+                       bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
+                       transition-colors duration-200 shadow-md"
             >
               Sign in
             </motion.button>
+
+            <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Register here
+              </Link>
+            </p>
           </form>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">
-            Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-            >
-              Register here
-            </Link>
-          </p>
         </motion.div>
       </div>
     </div>

@@ -10,10 +10,14 @@ import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 import Layout from "./components/Layout/Layout";
 import { useChatHistory } from "./hooks/useChatHistory";
+import { AuthProvider } from "./context/AuthContext";
+import { chatHistoryAPI } from "./api/chatHistory";
+import axios from "axios";
 
 function App() {
   const [formData, setFormData] = useState({
     subject: "",
+    topic: "",
     question: "",
     mainCommand: "",
   });
@@ -30,6 +34,7 @@ function App() {
       setFormData({
         question: history.messages[0]?.content || "",
         subject: history.subject,
+        topic: history.topic,
         mainCommand: history.mainCommand,
       });
 
@@ -45,8 +50,10 @@ function App() {
       setResponse(null);
       setFormData({
         subject: "",
+        topic: "",
         question: "",
         mainCommand: "",
+        realCommand: "",
       });
     };
 
@@ -67,76 +74,65 @@ function App() {
     };
   }, []);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/study", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "http://localhost:3000/api/study",
+        {
+          question: formData.question,
+          subject: formData.subject,
+          mainCommand: formData.mainCommand,
+          realCommand: formData.realCommand,
         },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      setResponse(data);
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": token,
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      // Create history entry
+      console.log("res", res);
+
+      setResponse(res.data);
+
+      // Create history entry with messages array
       const historyEntry = {
-        title: formData.question.slice(0, 50) + "...",
         messages: [
-          {
-            type: "question",
-            content: formData.question,
-            timestamp: new Date().toISOString(),
-          },
-          {
-            type: "answer",
-            content: data.answer,
-            timestamp: new Date().toISOString(),
-          },
+          { content: formData.question, type: "question" },
+          { content: data.response, type: "answer" },
         ],
         subject: formData.subject,
+        topic: formData.topic,
         mainCommand: formData.mainCommand,
       };
 
-      // Use createHistory from useChatHistory hook
       await createHistory(historyEntry);
-
-      // Clear form data after successful submission
-      setFormData({
-        subject: "",
-        question: "",
-        mainCommand: "",
-      });
+      window.dispatchEvent(new Event("chatHistoryUpdated"));
     } catch (error) {
-      console.error("Xato:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const updates = { [name]: value };
-
-      if (name === "question") {
-        updates.subject = "";
-        updates.mainCommand = "";
-      }
-
-      return {
-        ...prev,
-        ...updates,
-      };
-    });
   };
 
   const handleHistoryClick = (item) => {
     setFormData({
       question: item.question,
       subject: item.subject,
+      topic: item.topic,
       mainCommand: item.mainCommand,
     });
     setResponse({ answer: item.answer });
@@ -157,35 +153,37 @@ function App() {
 
   return (
     <Router>
-      <ThemeProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/"
-            element={
-              <Layout
-                history={history}
-                onHistoryClick={handleHistoryClick}
-                sidebarOpen={sidebarOpen}
-                onCloseSidebar={closeSidebar}
-                setSidebarOpen={setSidebarOpen}
-              >
-                <div className="max-w-[1300px] mx-auto rounded-xl shadow-md p-4 md:p-8 bg-white dark:bg-gray-800">
-                  <QuestionForm
-                    formData={formData}
-                    loading={loading}
-                    onSubmit={handleSubmit}
-                    onChange={handleChange}
-                    setResponse={setResponse}
-                  />
-                  <ResponseDisplay response={response} />
-                </div>
-              </Layout>
-            }
-          />
-        </Routes>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/"
+              element={
+                <Layout
+                  history={history}
+                  onHistoryClick={handleHistoryClick}
+                  sidebarOpen={sidebarOpen}
+                  onCloseSidebar={closeSidebar}
+                  setSidebarOpen={setSidebarOpen}
+                >
+                  <div className="max-w-[1300px] mx-auto rounded-xl shadow-md p-4 md:p-8 bg-white dark:bg-gray-800">
+                    <QuestionForm
+                      formData={formData}
+                      loading={loading}
+                      onSubmit={handleSubmit}
+                      onChange={handleChange}
+                      setResponse={setResponse}
+                    />
+                    <ResponseDisplay response={response} />
+                  </div>
+                </Layout>
+              }
+            />
+          </Routes>
+        </ThemeProvider>
+      </AuthProvider>
     </Router>
   );
 }

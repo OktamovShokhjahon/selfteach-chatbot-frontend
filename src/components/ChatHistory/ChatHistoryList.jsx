@@ -1,58 +1,72 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { chatHistoryAPI } from "../../api/chatHistory";
+import { useChatHistory } from "../../hooks/useChatHistory";
 
 const ChatHistoryList = () => {
-  const [histories, setHistories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { user } = useAuth();
+  const { histories, loading, error, fetchHistories } = useChatHistory();
+  const [historiesState, setHistoriesState] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
+  console.log(histories);
+
   useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === "chat_histories") {
-        const updatedHistories = e.newValue ? JSON.parse(e.newValue) : [];
-        setHistories(updatedHistories);
-      }
-    };
+    if (user) {
+      console.log("Current user:", user); // Debug log
+      fetchHistories();
+    }
+  }, [user, fetchHistories]);
 
+  useEffect(() => {
+    setHistoriesState(histories);
+  }, [histories]);
+
+  // Add listener for history updates
+  useEffect(() => {
     const handleHistoryUpdate = () => {
-      loadHistories();
+      fetchHistories();
     };
 
-    window.addEventListener("storage", handleStorageChange);
     window.addEventListener("chatHistoryUpdated", handleHistoryUpdate);
-    loadHistories();
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("chatHistoryUpdated", handleHistoryUpdate);
     };
-  }, []);
+  }, [fetchHistories]);
 
-  const loadHistories = () => {
+  const deleteHistory = async (id) => {
     try {
-      const stored = localStorage.getItem("chat_histories");
-      const histories = stored ? JSON.parse(stored) : [];
-      // Sort histories by createdAt in descending order (newest first)
-      const sortedHistories = histories.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      await chatHistoryAPI.delete(id);
+      // Update local state immediately for better UX
+      setHistoriesState((prevHistories) =>
+        prevHistories.filter((history) => history._id !== id)
       );
-      setHistories(sortedHistories);
-      setLoading(false);
-    } catch (err) {
-      setError("Chat tarixini yuklashda xatolik");
-      setLoading(false);
+      // Optionally show success message
+      console.log("History deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete history:", error);
+      // Optionally show error message to user
     }
   };
 
-  const deleteHistory = (id) => {
+  const deleteAllHistory = async () => {
+    if (!window.confirm("Haqiqatan ham barcha tarixni o'chirmoqchimisiz?")) {
+      return;
+    }
+
     try {
-      const updatedHistories = histories.filter((h) => h.id !== id);
-      localStorage.setItem("chat_histories", JSON.stringify(updatedHistories));
-      setHistories(updatedHistories);
-    } catch (err) {
-      setError("Tarixni o'chirishda xatolik");
+      setIsDeleting(true);
+      await chatHistoryAPI.deleteAll();
+      setHistoriesState([]);
+      console.log("All history deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete all history:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -74,11 +88,9 @@ const ChatHistoryList = () => {
     };
 
     localStorage.setItem("selected_history", JSON.stringify(formattedHistory));
-
+    // Dispatch custom event
     window.dispatchEvent(
-      new CustomEvent("historySelected", {
-        detail: formattedHistory,
-      })
+      new CustomEvent("historySelected", { detail: formattedHistory })
     );
   };
 
@@ -101,10 +113,10 @@ const ChatHistoryList = () => {
   const clearAllHistory = () => {
     try {
       localStorage.setItem("chat_histories", JSON.stringify([]));
-      setHistories([]);
+      setHistoriesState([]);
       window.dispatchEvent(new Event("chatHistoryUpdated"));
     } catch (err) {
-      setError("Tarixni tozalashda xatolik");
+      console.error("Failed to clear all history:", err);
     }
   };
 
@@ -128,6 +140,20 @@ const ChatHistoryList = () => {
       },
     },
   };
+
+  if (!user) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600 dark:text-gray-400">
+          Please{" "}
+          <Link to="/login" className="text-blue-500 hover:underline">
+            login
+          </Link>{" "}
+          to view your chat history
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -195,9 +221,11 @@ const ChatHistoryList = () => {
           variants={itemVariants}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={clearAllHistory}
-          className="p-4 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md 
-                    transition-colors duration-200 flex items-center justify-center gap-2"
+          onClick={deleteAllHistory}
+          disabled={isDeleting}
+          className={`p-4 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md 
+                    transition-colors duration-200 flex items-center justify-center gap-2
+                    ${isDeleting ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -213,21 +241,20 @@ const ChatHistoryList = () => {
               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
             />
           </svg>
+          {isDeleting ? "O'chirilmoqda..." : "o'chrish"}
         </button>
       </div>
 
-      {histories.map((history) => (
-        <div
-          key={history.id}
-          variants={itemVariants}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="cursor-pointer p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg 
-                    transition-shadow duration-200 border border-gray-100 dark:border-gray-700"
+      {historiesState.map((history) => (
+        <motion.div
+          key={history._id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow duration-200"
           onClick={() => handleHistorySelect(history)}
         >
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-            {history.title}
+          <h3 className="font-medium text-gray-800 dark:text-white mb-2 truncate">
+            {history.messages[0]?.content || "No question"}
           </h3>
           <div className="mt-3 text-sm text-gray-600 dark:text-gray-300 space-y-2">
             <div className="flex items-center gap-2">
@@ -250,7 +277,7 @@ const ChatHistoryList = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              deleteHistory(history.id);
+              deleteHistory(history._id);
             }}
             className="mt-4 px-4 py-2 w-full text-sm text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
           >
@@ -270,7 +297,7 @@ const ChatHistoryList = () => {
             </svg>
             O'chirish
           </button>
-        </div>
+        </motion.div>
       ))}
     </motion.div>
   );

@@ -6,11 +6,11 @@ export const useChatHistory = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch all histories
   const fetchHistories = useCallback(async () => {
     setLoading(true);
     try {
       const data = await chatHistoryAPI.getAll();
+      console.log("Fetched histories:", data); // Debug log
       setHistories(data);
       setError(null);
     } catch (err) {
@@ -20,7 +20,6 @@ export const useChatHistory = () => {
     }
   }, []);
 
-  // Create new history
   const createHistory = useCallback(async (historyData) => {
     setLoading(true);
     try {
