@@ -73,7 +73,7 @@ export function QuestionForm({
           name="question"
           value={formData.question}
           onChange={onChange}
-          placeholder="Enter your question..."
+          placeholder="Savolingizni kiriting..."
           className="outline-none w-full p-3 rounded-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:border-blue-400 text-gray-800 dark:text-white transition-colors duration-200"
           rows="4"
           required
@@ -88,7 +88,7 @@ export function QuestionForm({
           onChange={onChange}
           className="outline-none flex-1 p-3 rounded-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:border-blue-400 text-gray-800 dark:text-white transition-colors duration-200"
         >
-          <option value="">Select Subject</option>
+          <option value="">Fanni tanlang</option>
           {subjects.map((subject) => (
             <option key={subject._id} value={subject.name}>
               {subject.name}
@@ -103,7 +103,7 @@ export function QuestionForm({
           onChange={onChange}
           className="outline-none flex-1 p-3 rounded-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:border-blue-400 text-gray-800 dark:text-white transition-colors duration-200"
         >
-          <option value="">Select Topic</option>
+          <option value="">Mavzuni tanlang</option>
           {topics.map((topic) => (
             <option key={topic._id} value={topic.name}>
               {topic.name}
@@ -118,7 +118,7 @@ export function QuestionForm({
           onChange={onChange}
           className="outline-none flex-1 p-3 rounded-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:border-blue-400 text-gray-800 dark:text-white transition-colors duration-200"
         >
-          <option value="">Select Topic</option>
+          <option value="">Buyruqni tanlang</option>
           {commands.map((topic) => (
             <option key={topic} value={topic}>
               {topic}
@@ -138,7 +138,7 @@ export function QuestionForm({
             : "bg-blue-500 hover:bg-blue-600 dark:bg-indigo-500 dark:hover:bg-indigo-600"
         } text-white font-medium`}
       >
-        {loading ? "Loading..." : "Submit"}
+        {loading ? "Yuklanmoqda..." : "Yuborish"}
       </motion.button>
     </motion.form>
   );

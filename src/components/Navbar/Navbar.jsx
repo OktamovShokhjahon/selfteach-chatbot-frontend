@@ -66,7 +66,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
                   onClick={logout}
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
                 >
-                  Logout
+                  Chiqish
                 </motion.button>
               </div>
             ) : (
@@ -75,13 +75,13 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
                   to="/login"
                   className="text-gray-800 dark:text-white hover:text-blue-500 dark:hover:text-blue-400"
                 >
-                  Login
+                  Kirish
                 </Link>
                 <Link
                   to="/register"
                   className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
                 >
-                  Register
+                  Ro'yxatdan o'tish
                 </Link>
               </div>
             )}
@@ -132,7 +132,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
                           }}
                           className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
                         >
-                          Logout
+                          Chiqish
                         </button>
                       </>
                     ) : (
@@ -142,14 +142,14 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
-                          Login
+                          Kirish
                         </Link>
                         <Link
                           to="/register"
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
-                          Register
+                          Ro'yxatdan o'tish
                         </Link>
                       </>
                     )}

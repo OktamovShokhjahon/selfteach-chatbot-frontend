@@ -26,12 +26,12 @@ const Register = () => {
     setError("");
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long");
+      setError("Parol kamida 6 ta belgidan iborat bo'lishi kerak");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError("Parollar mos kelmadi");
       return;
     }
 
@@ -55,7 +55,7 @@ const Register = () => {
         >
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-white">
-              Create your account
+              Hisobingizni yarating
             </h2>
           </div>
 
@@ -69,7 +69,7 @@ const Register = () => {
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
-                  Email address
+                  Elektron pochta
                 </label>
                 <input
                   id="email"
@@ -80,7 +80,7 @@ const Register = () => {
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                            focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent
                            transition-all duration-200"
-                  placeholder="Enter your email"
+                  placeholder="Elektron pochtangizni kiriting"
                   value={formData.email}
                   onChange={handleChange}
                 />
@@ -91,7 +91,7 @@ const Register = () => {
                   htmlFor="password"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
-                  Password
+                  Parol
                 </label>
                 <input
                   id="password"
@@ -102,7 +102,7 @@ const Register = () => {
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                            focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent
                            transition-all duration-200"
-                  placeholder="Create a password (min 6 characters)"
+                  placeholder="Parol yarating (kamida 6 ta belgi)"
                   value={formData.password}
                   onChange={handleChange}
                 />
@@ -113,7 +113,7 @@ const Register = () => {
                   htmlFor="confirmPassword"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
-                  Confirm Password
+                  Parolni tasdiqlang
                 </label>
                 <input
                   id="confirmPassword"
@@ -124,7 +124,7 @@ const Register = () => {
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                            focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent
                            transition-all duration-200"
-                  placeholder="Confirm your password"
+                  placeholder="Parolni qayta kiriting"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
@@ -139,16 +139,16 @@ const Register = () => {
                        bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
                        transition-colors duration-200 shadow-md"
             >
-              Create Account
+              Hisob yaratish
             </motion.button>
 
             <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-              Already have an account?{" "}
+              Hisobingiz bormi?{" "}
               <Link
                 to="/login"
                 className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
               >
-                Sign in here
+                Bu yerda kiring
               </Link>
             </p>
           </form>
